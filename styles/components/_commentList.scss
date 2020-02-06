@@ -1,0 +1,79 @@
+
+.comment__box {
+  
+    line-height: 18px;
+    padding: 10px 15px;
+
+    overflow: hidden;
+    overflow-wrap: break-word;
+    box-sizing: border-box;
+    width: 100%;
+
+    font-size: $default-font-size;
+    color: $color-grey-dark-3;
+    background-color: transparent;
+    resize: none;
+
+    border: 2px solid #d4d7d8;
+    border-radius: 6px;
+    &:focus {
+      outline: 0;
+    }
+}
+.comment__section {
+  .row {
+    margin-left: -($gutter-horizontal);
+    ul {
+      padding-left: $gutter-horizontal;
+    }
+
+    .comment {
+      display: flex;
+      margin: ($gutter-vertical * 0.20) 0;
+
+      .avatar {
+          margin-right: 10px;
+        img {
+          border-radius: 4px;
+        }
+      }
+      .content {
+        display: flex;
+        flex-direction: column;
+        align-items: start;
+        a {
+          font-size: $default-font-size *.92;
+          font-weight: 600;
+          color: $color-tertiary-light;
+          position: relative;
+        }
+        p {
+          font-size: $default-font-size;
+          color: #000;
+          font-weight: 400;
+          padding: 0 0 5px;
+          opacity: 0.9;
+          margin:0;
+        }
+        button {
+            margin-right: $gutter-horizontal * .1;
+            
+            font-weight: normal;
+            color: $color-grey-dark;
+            background: transparent;
+            border: none;
+            font-size: $default-font-size *.86;
+
+            &:hover {
+                cursor: pointer;
+
+                text-decoration: underline;
+            };
+        }
+        .comment__delete-btn {
+            color:$color-danger
+        }
+      }
+    }
+  }
+}

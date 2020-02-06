@@ -12,7 +12,6 @@ export default class commentList {
             parent: !!parentId,
             parentId
         };
-
         this.commentList.push(comment);
         this._persistComments();
     }
@@ -26,11 +25,19 @@ export default class commentList {
         this._persistComments();
     }
 
+    softDeleteComment(id, text){
+        const updateComment = this.commentList.find(listItem => listItem.id == id);
+
+        updateComment.text = text;
+        updateComment.deleted = true;
+
+        this._persistComments();
+    }
     deleteComment(id){
-        const updatedCommentList = this.commentList.filter(listItem => listItem.id !== id);
+        const updatedCommentList = this.commentList.filter(listItem => listItem.id == id);
 
         this.commentList = updatedCommentList;
-
+        debugger
         this._persistComments();
     }
 
@@ -39,8 +46,8 @@ export default class commentList {
     }
 
     readStorage(){
+        
         const storage = JSON.parse(localStorage.getItem('commentList'));
-
         if (storage) this.commentList = storage;
     }
 

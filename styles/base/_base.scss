@@ -16,3 +16,19 @@ body {
     line-height: 1.7;
     color: $color-grey-dark;
 }
+a,
+a:visited,
+a:link {
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+main {
+  max-width: 770px;
+  margin: 0 auto;
+}
+header {
+    text-align: center;
+    margin: 20px 0;
+}

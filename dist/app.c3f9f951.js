@@ -165,12 +165,24 @@ function () {
       this._persistComments();
     }
   }, {
+    key: "softDeleteComment",
+    value: function softDeleteComment(id, text) {
+      var updateComment = this.commentList.find(function (listItem) {
+        return listItem.id == id;
+      });
+      updateComment.text = text;
+      updateComment.deleted = true;
+
+      this._persistComments();
+    }
+  }, {
     key: "deleteComment",
     value: function deleteComment(id) {
       var updatedCommentList = this.commentList.filter(function (listItem) {
-        return listItem.id !== id;
+        return listItem.id == id;
       });
       this.commentList = updatedCommentList;
+      debugger;
 
       this._persistComments();
     }
@@ -203,6 +215,28 @@ var elements = {
   commentList: document.querySelector('.comment__list')
 };
 exports.elements = elements;
+},{}],"js/helper/getAvatar.js":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var getAvatar = function getAvatar(username) {
+  var avatars = {
+    'Ashish': 'http://easycomment.akbilisim.com/demo/app/upload/member/avatar/ec-user14-95cbccd215b174-s.jpg',
+    'Ravi': 'http://easycomment.akbilisim.com/demo/app/upload/member/avatar/ec-user2-565b4bb4c813ca-s.jpg',
+    'Suraj': 'http://easycomment.akbilisim.com/demo/app/upload/member/avatar/ec-user13-19873725ed76e2-s.jpg',
+    'Saru': 'http://easycomment.akbilisim.com/demo/app/upload/member/avatar/ec-user19-7966a1b638bd69-s.jpg',
+    'Mano': 'http://easycomment.akbilisim.com/demo/app/upload/member/avatar/ec-user18-1881baeccb7399-s.jpg',
+    'Debo': 'http://easycomment.akbilisim.com/demo/app/upload/member/avatar/ec-user17-919635985f2132-s.jpg'
+  };
+  return avatars[username];
+};
+
+var _default = getAvatar;
+exports.default = _default;
 },{}],"js/view/commentListView.js":[function(require,module,exports) {
 "use strict";
 
@@ -212,6 +246,10 @@ Object.defineProperty(exports, "__esModule", {
 exports.renderChildrenCommentMarkup = exports.renderCommentMarkup = exports.clearInput = exports.getInput = void 0;
 
 var _base = require("./base");
+
+var _getAvatar = _interopRequireDefault(require("../helper/getAvatar"));
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var getInput = function getInput() {
   return _base.elements.commentTextbox.value;
@@ -225,21 +263,21 @@ var clearInput = function clearInput() {
 
 exports.clearInput = clearInput;
 
-var renderCommentMarkup = function renderCommentMarkup(id, username, commentText, child) {
-  var markup = "\n        <li data-id=\"".concat(id, "\">\n            <span>").concat(username, "</span>\n            <span>").concat(commentText, "</span>\n            <button class=\"comment__reply-btn\" data-id=\"").concat(id, "\">Reply</button>\n        </li>\n    ");
+var renderCommentMarkup = function renderCommentMarkup(id, username, commentText, child, renderControls) {
+  var markup = "\n        <li class=\"comment\" data-id=\"".concat(id, "\">\n            <div class=\"avatar\">\n                <img src=\"").concat((0, _getAvatar.default)(username), "\" />\n            </div>\n            <div class=\"content\">\n                <a href=\"#\">").concat(username, "</a>\n                <p>").concat(commentText, "</p>\n                <div>\n                   ").concat(renderControls(id), "\n                </div>\n            </div>\n        </li>\n    ");
   !child && _base.elements.commentList.insertAdjacentHTML('afterbegin', markup);
   return markup;
 };
 
 exports.renderCommentMarkup = renderCommentMarkup;
 
-var renderChildrenCommentMarkup = function renderChildrenCommentMarkup(id, username, commentText) {
-  var markup = "\n        <ul class=\"comment__list\">\n            ".concat(renderCommentMarkup(id, username, commentText, true), "\n        </ul>\n    ");
-  document.querySelector("li[data-id=\"".concat(id, "\"]")).insertAdjacentHTML('afterend', markup);
+var renderChildrenCommentMarkup = function renderChildrenCommentMarkup(id, username, commentText, parentCommentId, renderControls) {
+  var markup = "\n        <ul class=\"comment__list\">\n            ".concat(renderCommentMarkup(id, username, commentText, true, renderControls), "\n        </ul>\n    ");
+  document.querySelector("li[data-id=\"".concat(parentCommentId, "\"]")).insertAdjacentHTML('afterend', markup);
 };
 
 exports.renderChildrenCommentMarkup = renderChildrenCommentMarkup;
-},{"./base":"js/view/base.js"}],"js/helper/generateUniqueId.js":[function(require,module,exports) {
+},{"./base":"js/view/base.js","../helper/getAvatar":"js/helper/getAvatar.js"}],"js/helper/generateUniqueId.js":[function(require,module,exports) {
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -307,10 +345,11 @@ var controlCommentList = function controlCommentList(id) {
   if (!state.commentList) state.commentList = new _CommentList.default();
 
   if (comment) {
-    state.commentList.addComment(randomId, comment);
+    var isChild = !!id;
+    state.commentList.addComment(randomId, username, comment, isChild, id);
     commentListView.clearInput(); // @todo: think something else here, it's bad
 
-    id ? commentListView.renderChildrenCommentMarkup(id, username, comment) : commentListView.renderCommentMarkup(randomId, username, comment);
+    id ? commentListView.renderChildrenCommentMarkup(randomId, username, comment, id, renderControls) : commentListView.renderCommentMarkup(randomId, username, comment, undefined, renderControls);
   }
 };
 
@@ -318,23 +357,88 @@ _base.elements.commentTextbox.addEventListener('keyup', function (e) {
   if (e.keyCode === 13) {
     controlCommentList(e.target.dataset.id);
 
-    _base.elements.commentTextbox.removeAttribute("data-id");
+    _base.elements.commentTextbox.removeAttribute('data-id');
   }
 });
 
 _base.elements.commentList.addEventListener('click', function (e) {
-  if (e.target.tagName === 'BUTTON') {
+  e.preventDefault();
+  if (e.target.tagName !== 'BUTTON') return;
+  var btn = e.target;
+  var id = btn.dataset.id;
+  var li = document.querySelector("li[data-id=\"".concat(id, "\"]"));
+
+  if (btn.classList.contains('comment__reply-btn')) {
+    li.insertAdjacentElement('afterend', _base.elements.commentTextbox);
+
     _base.elements.commentTextbox.focus();
 
-    _base.elements.commentTextbox.setAttribute("data-id", e.target.dataset.id);
+    _base.elements.commentTextbox.setAttribute('data-id', id);
+  }
+
+  if (btn.classList.contains('comment__delete-btn')) {
+    if (!confirm('Are you sure to delete this item?')) return;
+    var deletedText = 'This comment has been deleted';
+    state.commentList.softDeleteComment(id, deletedText);
+    li.querySelector('.content p').innerHTML = deletedText;
+    e.target.remove();
   }
 });
 
 window.addEventListener('load', function (e) {
   state.commentList = new _CommentList.default();
-  state.commentList.readStorage();
-  debugger; //@todo: render n number of comment here based on config.js
+  state.commentList.readStorage(); //@todo: render n number of comment here based on config.js
+
+  var _iteratorNormalCompletion = true;
+  var _didIteratorError = false;
+  var _iteratorError = undefined;
+
+  try {
+    for (var _iterator = state.commentList.commentList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+      var comment = _step.value;
+      console.log(comment);
+      var id = comment.id,
+          username = comment.username,
+          commentText = comment.text,
+          parentId = comment.parentId;
+
+      if (parentId) {
+        commentListView.renderChildrenCommentMarkup(id, username, commentText, parentId, renderControls);
+      } else {
+        commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
+      }
+    }
+  } catch (err) {
+    _didIteratorError = true;
+    _iteratorError = err;
+  } finally {
+    try {
+      if (!_iteratorNormalCompletion && _iterator.return != null) {
+        _iterator.return();
+      }
+    } finally {
+      if (_didIteratorError) {
+        throw _iteratorError;
+      }
+    }
+  }
 });
+/**
+ * Controls
+ */
+
+var renderControls = function renderControls(id) {
+  var comment = state.commentList.commentList.find(function (c) {
+    return c.id == id;
+  });
+  var output = "<button class=\"comment__reply-btn\" data-id=\"".concat(id, "\">Reply</button>");
+
+  if (comment && !comment.deleted) {
+    output += "<button class=\"comment__delete-btn\" data-id=\"".concat(id, "\">Delete</button>");
+  }
+
+  return output;
+};
 },{"./model/CommentList":"js/model/CommentList.js","./view/commentListView":"js/view/commentListView.js","./view/base":"js/view/base.js","./helper/generateUniqueId":"js/helper/generateUniqueId.js","./helper/randomName":"js/helper/randomName.js"}],"node_modules/parcel-bundler/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
@@ -363,7 +467,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "50226" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51022" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
