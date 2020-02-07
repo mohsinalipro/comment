@@ -34,7 +34,7 @@ export default class commentList {
         this._persistComments();
     }
     deleteComment(id){
-        const updatedCommentList = this.commentList.filter(listItem => listItem.id == id);
+        const updatedCommentList = this.commentList.filter(listItem => listItem.id != id);
 
         this.commentList = updatedCommentList;
         this._persistComments();

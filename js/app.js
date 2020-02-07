@@ -74,10 +74,16 @@ elements.commentList.addEventListener('click', e => {
 
   if (btn.classList.contains('comment__delete-btn')) {
     if (!confirm('Are you sure to delete this item?')) return;
-    const deletedText = 'This comment has been deleted';
-    state.commentList.softDeleteComment(id, deletedText);
-    li.querySelector('.content p').innerHTML = deletedText;
-    e.target.remove();
+    const isParent = state.commentList.commentList.find(comment => comment.parentId == id);
+    if(isParent) {
+      const deletedText = 'This comment has been deleted';
+      state.commentList.softDeleteComment(id, deletedText);
+      li.querySelector('.content p').innerHTML = deletedText;
+      e.target.remove();
+    } else {
+      state.commentList.deleteComment(id);
+      li.remove();
+    }
   }
 });
 
@@ -104,9 +110,32 @@ window.addEventListener('load', e => {
 const initComments = (state, limit) => {
     
   //@todo: render n number of comment here based on config.js
-    for (let i in state.commentList.commentList) {
+
+    if(!isNaN(limit)) {
+      const tempComments = [];
+      for (let i = 0; i < limit; i++) {
+        const comment = state.commentList.commentList[(state.commentList.commentList.length-1)-i];
+        if(comment) tempComments.push(comment);
+      }
+      for(let i = 0; i < tempComments.length; i++) {
+        const comment = tempComments[i];
+        const { id, username, text: commentText, parentId } = comment;
+        if (parentId) {
+          commentListView.renderChildrenCommentMarkup(
+            id,
+            username,
+            commentText,
+            parentId,
+            renderControls
+          );
+        } else {
+          commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
+        }
+      }
+    } else {
+      
+    for (let i = 0; i < state.commentList.commentList.length; i++) {
       const comment = state.commentList.commentList[i];
-      if(i == limit) return;
       const { id, username, text: commentText, parentId } = comment;
       if (parentId) {
         commentListView.renderChildrenCommentMarkup(
@@ -119,6 +148,7 @@ const initComments = (state, limit) => {
       } else {
         commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
       }
+    }
     }
   }
 /**

@@ -34,5 +34,8 @@ export const renderChildrenCommentMarkup = (id, username, commentText, parentCom
             ${renderCommentMarkup(id, username, commentText, true, renderControls)}
         </ul>
     `;
-    document.querySelector(`li[data-id="${parentCommentId}"]`).insertAdjacentHTML('afterend', markup);
+    const li =     document.querySelector(`li[data-id="${parentCommentId}"]`);
+    debugger
+    if(!li) return;
+    li.insertAdjacentHTML('afterend', markup);
 };

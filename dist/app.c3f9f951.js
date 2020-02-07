@@ -179,7 +179,7 @@ function () {
     key: "deleteComment",
     value: function deleteComment(id) {
       var updatedCommentList = this.commentList.filter(function (listItem) {
-        return listItem.id == id;
+        return listItem.id != id;
       });
       this.commentList = updatedCommentList;
 
@@ -275,7 +275,10 @@ exports.renderCommentMarkup = renderCommentMarkup;
 
 var renderChildrenCommentMarkup = function renderChildrenCommentMarkup(id, username, commentText, parentCommentId, renderControls) {
   var markup = "\n        <ul class=\"comment__list\">\n            ".concat(renderCommentMarkup(id, username, commentText, true, renderControls), "\n        </ul>\n    ");
-  document.querySelector("li[data-id=\"".concat(parentCommentId, "\"]")).insertAdjacentHTML('afterend', markup);
+  var li = document.querySelector("li[data-id=\"".concat(parentCommentId, "\"]"));
+  debugger;
+  if (!li) return;
+  li.insertAdjacentHTML('afterend', markup);
 };
 
 exports.renderChildrenCommentMarkup = renderChildrenCommentMarkup;
@@ -391,10 +394,19 @@ _base.elements.commentList.addEventListener('click', function (e) {
 
   if (btn.classList.contains('comment__delete-btn')) {
     if (!confirm('Are you sure to delete this item?')) return;
-    var deletedText = 'This comment has been deleted';
-    state.commentList.softDeleteComment(id, deletedText);
-    li.querySelector('.content p').innerHTML = deletedText;
-    e.target.remove();
+    var isParent = state.commentList.commentList.find(function (comment) {
+      return comment.parentId == id;
+    });
+
+    if (isParent) {
+      var deletedText = 'This comment has been deleted';
+      state.commentList.softDeleteComment(id, deletedText);
+      li.querySelector('.content p').innerHTML = deletedText;
+      e.target.remove();
+    } else {
+      state.commentList.deleteComment(id);
+      li.remove();
+    }
   }
 });
 
@@ -419,18 +431,40 @@ window.addEventListener('load', function (e) {
 
 var initComments = function initComments(state, limit) {
   //@todo: render n number of comment here based on config.js
-  for (var i in state.commentList.commentList) {
-    var comment = state.commentList.commentList[i];
-    if (i == limit) return;
-    var id = comment.id,
-        username = comment.username,
-        commentText = comment.text,
-        parentId = comment.parentId;
+  if (!isNaN(limit)) {
+    var tempComments = [];
 
-    if (parentId) {
-      commentListView.renderChildrenCommentMarkup(id, username, commentText, parentId, renderControls);
-    } else {
-      commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
+    for (var i = 0; i < limit; i++) {
+      var comment = state.commentList.commentList[state.commentList.commentList.length - 1 - i];
+      if (comment) tempComments.push(comment);
+    }
+
+    for (var _i = 0; _i < tempComments.length; _i++) {
+      var _comment = tempComments[_i];
+      var id = _comment.id,
+          username = _comment.username,
+          commentText = _comment.text,
+          parentId = _comment.parentId;
+
+      if (parentId) {
+        commentListView.renderChildrenCommentMarkup(id, username, commentText, parentId, renderControls);
+      } else {
+        commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
+      }
+    }
+  } else {
+    for (var _i2 = 0; _i2 < state.commentList.commentList.length; _i2++) {
+      var _comment2 = state.commentList.commentList[_i2];
+      var _id = _comment2.id,
+          _username = _comment2.username,
+          _commentText = _comment2.text,
+          _parentId = _comment2.parentId;
+
+      if (_parentId) {
+        commentListView.renderChildrenCommentMarkup(_id, _username, _commentText, _parentId, renderControls);
+      } else {
+        commentListView.renderCommentMarkup(_id, _username, _commentText, undefined, renderControls);
+      }
     }
   }
 };
