@@ -3,6 +3,7 @@ import getAvatar from '../helper/getAvatar'
 export const getInput = () => elements.commentTextbox.value;
 
 export const clearInput = () => {
+    elements.mainCommentTextbox.value = '';
     elements.commentTextbox.value = '';
 };
 

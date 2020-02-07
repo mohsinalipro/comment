@@ -182,7 +182,6 @@ function () {
         return listItem.id == id;
       });
       this.commentList = updatedCommentList;
-      debugger;
 
       this._persistComments();
     }
@@ -211,6 +210,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.elements = void 0;
 var elements = {
+  mainCommentTextbox: document.querySelector('.main_comment__box'),
   commentTextbox: document.querySelector('.comment__box'),
   commentList: document.querySelector('.comment__list'),
   viewPreviousButton: document.querySelector('.view_previous_comments-btn')
@@ -259,6 +259,7 @@ var getInput = function getInput() {
 exports.getInput = getInput;
 
 var clearInput = function clearInput() {
+  _base.elements.mainCommentTextbox.value = '';
   _base.elements.commentTextbox.value = '';
 };
 
@@ -340,8 +341,8 @@ var defaultShowLimit = 4;
  * Comment List Controller
  */
 
-var controlCommentList = function controlCommentList(id) {
-  var comment = _base.elements.commentTextbox.value;
+var controlCommentList = function controlCommentList(commentTextbox, id) {
+  var comment = commentTextbox.value;
   var username = (0, _randomName.default)();
   var randomId = (0, _generateUniqueId.default)();
   if (!state.commentList) state.commentList = new _CommentList.default();
@@ -357,9 +358,18 @@ var controlCommentList = function controlCommentList(id) {
 
 _base.elements.commentTextbox.addEventListener('keyup', function (e) {
   if (e.keyCode === 13) {
-    controlCommentList(e.target.dataset.id);
+    controlCommentList(_base.elements.commentTextbox, e.target.dataset.id);
 
     _base.elements.commentTextbox.removeAttribute('data-id');
+  }
+});
+
+_base.elements.mainCommentTextbox.addEventListener('keyup', function (e) {
+  if (e.keyCode === 13) {
+    debugger;
+    controlCommentList(_base.elements.mainCommentTextbox, e.target.dataset.id);
+
+    _base.elements.mainCommentTextbox.removeAttribute('data-id');
   }
 });
 
@@ -371,6 +381,7 @@ _base.elements.commentList.addEventListener('click', function (e) {
   var li = document.querySelector("li[data-id=\"".concat(id, "\"]"));
 
   if (btn.classList.contains('comment__reply-btn')) {
+    document.querySelector('.main_comment__text-section').style.display = 'block';
     li.insertAdjacentElement('afterend', _base.elements.commentTextbox);
 
     _base.elements.commentTextbox.focus();
@@ -390,7 +401,7 @@ _base.elements.commentList.addEventListener('click', function (e) {
 window.addEventListener('load', function (e) {
   state.commentList = new _CommentList.default();
   state.commentList.readStorage();
-  initComments(state, 4);
+  initComments(state, defaultShowLimit);
 
   _base.elements.viewPreviousButton.addEventListener('click', function (e) {
     initComments(state);
@@ -398,7 +409,8 @@ window.addEventListener('load', function (e) {
     _base.elements.viewPreviousButton.remove();
   });
 
-  if (state.commentList.commentList.length > 4) {// elements.viewPreviousButton.remove();
+  if (!state.commentList || state.commentList && state.commentList.commentList.length <= defaultShowLimit) {
+    _base.elements.viewPreviousButton.remove();
   }
 });
 /**
@@ -410,7 +422,6 @@ var initComments = function initComments(state, limit) {
   for (var i in state.commentList.commentList) {
     var comment = state.commentList.commentList[i];
     if (i == limit) return;
-    debugger;
     var id = comment.id,
         username = comment.username,
         commentText = comment.text,

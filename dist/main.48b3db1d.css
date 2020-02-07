@@ -37,7 +37,7 @@ header {
   margin: 20px 0;
 }
 
-.comment__box {
+textarea {
   line-height: 18px;
   padding: 10px 15px;
   overflow: hidden;
@@ -51,7 +51,7 @@ header {
   border: 2px solid #d4d7d8;
   border-radius: 6px;
 }
-.comment__box:focus {
+textarea:focus {
   outline: 0;
 }
 

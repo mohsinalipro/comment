@@ -18,8 +18,8 @@ const defaultShowLimit = 4;
 /**
  * Comment List Controller
  */
-const controlCommentList = id => {
-  const comment = elements.commentTextbox.value;
+const controlCommentList = (commentTextbox, id) => {
+  const comment = commentTextbox.value;
   let username = randomUsername();
   let randomId = generateUniqueId();
   if (!state.commentList) state.commentList = new CommentList();
@@ -45,8 +45,16 @@ const controlCommentList = id => {
 
 elements.commentTextbox.addEventListener('keyup', e => {
   if (e.keyCode === 13) {
-    controlCommentList(e.target.dataset.id);
+    controlCommentList(elements.commentTextbox, e.target.dataset.id);
     elements.commentTextbox.removeAttribute('data-id');
+  }
+});
+
+elements.mainCommentTextbox.addEventListener('keyup', e => {
+  if (e.keyCode === 13) {
+    debugger
+    controlCommentList(elements.mainCommentTextbox, e.target.dataset.id);
+    elements.mainCommentTextbox.removeAttribute('data-id');
   }
 });
 
@@ -58,8 +66,8 @@ elements.commentList.addEventListener('click', e => {
   const id = btn.dataset.id;
   const li = document.querySelector(`li[data-id="${id}"]`);
   if (btn.classList.contains('comment__reply-btn')) {
+    document.querySelector('.main_comment__text-section').style.display = 'block';
     li.insertAdjacentElement('afterend', elements.commentTextbox);
-
     elements.commentTextbox.focus();
     elements.commentTextbox.setAttribute('data-id', id);
   }
@@ -78,14 +86,14 @@ window.addEventListener('load', e => {
   state.commentList = new CommentList();
 
   state.commentList.readStorage();
-  initComments(state, 4);
+  initComments(state, defaultShowLimit);
 
   elements.viewPreviousButton.addEventListener('click', function(e) {
     initComments(state);
     elements.viewPreviousButton.remove();
   })
-  if(state.commentList.commentList.length > 4) {
-    // elements.viewPreviousButton.remove();
+  if(!state.commentList || (state.commentList && state.commentList.commentList.length <= defaultShowLimit)) {
+    elements.viewPreviousButton.remove();
   }
 });
 
@@ -99,7 +107,6 @@ const initComments = (state, limit) => {
     for (let i in state.commentList.commentList) {
       const comment = state.commentList.commentList[i];
       if(i == limit) return;
-      debugger;
       const { id, username, text: commentText, parentId } = comment;
       if (parentId) {
         commentListView.renderChildrenCommentMarkup(

@@ -37,7 +37,6 @@ export default class commentList {
         const updatedCommentList = this.commentList.filter(listItem => listItem.id == id);
 
         this.commentList = updatedCommentList;
-        debugger
         this._persistComments();
     }
 
