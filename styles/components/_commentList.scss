@@ -20,6 +20,7 @@
       outline: 0;
     }
 }
+
 .comment__section {
   .row {
     margin-left: -($gutter-horizontal);
@@ -55,25 +56,29 @@
           opacity: 0.9;
           margin:0;
         }
-        button {
-            margin-right: $gutter-horizontal * .1;
-            
-            font-weight: normal;
-            color: $color-grey-dark;
-            background: transparent;
-            border: none;
-            font-size: $default-font-size *.86;
-
-            &:hover {
-                cursor: pointer;
-
-                text-decoration: underline;
-            };
-        }
         .comment__delete-btn {
             color:$color-danger
         }
       }
     }
+  }
+  
+  button {
+    margin-right: $gutter-horizontal * .1;
+    
+    font-weight: normal;
+    color: $color-grey-dark;
+    background: transparent;
+    border: none;
+    font-size: $default-font-size *.86;
+
+    &:hover {
+        cursor: pointer;
+
+        text-decoration: underline;
+    };
+}
+  .view_previous_comments-btn {
+    color: $color-grey-dark-3
   }
 }

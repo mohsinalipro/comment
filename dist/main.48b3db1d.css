@@ -90,7 +90,10 @@ header {
   opacity: 0.9;
   margin: 0;
 }
-.comment__section .row .comment .content button {
+.comment__section .row .comment .content .comment__delete-btn {
+  color: darkred;
+}
+.comment__section button {
   margin-right: 0.6rem;
   font-weight: normal;
   color: #777;
@@ -98,12 +101,12 @@ header {
   border: none;
   font-size: 1.376rem;
 }
-.comment__section .row .comment .content button:hover {
+.comment__section button:hover {
   cursor: pointer;
   text-decoration: underline;
 }
-.comment__section .row .comment .content .comment__delete-btn {
-  color: darkred;
+.comment__section .view_previous_comments-btn {
+  color: #333;
 }
 
 /*# sourceMappingURL=/main.48b3db1d.css.map */

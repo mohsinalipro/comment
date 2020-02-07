@@ -13,6 +13,7 @@ import randomUsername from './helper/randomName';
  * Store for comments
  */
 const state = {};
+const defaultShowLimit = 4;
 
 /**
  * Comment List Controller
@@ -72,30 +73,47 @@ elements.commentList.addEventListener('click', e => {
   }
 });
 
+
 window.addEventListener('load', e => {
   state.commentList = new CommentList();
 
   state.commentList.readStorage();
+  initComments(state, 4);
 
-  //@todo: render n number of comment here based on config.js
-  for (let comment of state.commentList.commentList) {
-    console.log(comment);
-    const { id, username, text: commentText, parentId } = comment;
-    if (parentId) {
-      commentListView.renderChildrenCommentMarkup(
-        id,
-        username,
-        commentText,
-        parentId,
-        renderControls
-      );
-    } else {
-      commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
-    }
+  elements.viewPreviousButton.addEventListener('click', function(e) {
+    initComments(state);
+    elements.viewPreviousButton.remove();
+  })
+  if(state.commentList.commentList.length > 4) {
+    // elements.viewPreviousButton.remove();
   }
 });
 
 
+/**
+ * Initialize Comments
+ */
+const initComments = (state, limit) => {
+    
+  //@todo: render n number of comment here based on config.js
+    for (let i in state.commentList.commentList) {
+      const comment = state.commentList.commentList[i];
+      if(i == limit) return;
+      debugger;
+      const { id, username, text: commentText, parentId } = comment;
+      if (parentId) {
+        commentListView.renderChildrenCommentMarkup(
+          id,
+          username,
+          commentText,
+          parentId,
+          renderControls
+        );
+      } else {
+        commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
+      }
+    }
+  }
 /**
  * Controls
  */

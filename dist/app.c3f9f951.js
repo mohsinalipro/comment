@@ -212,7 +212,8 @@ Object.defineProperty(exports, "__esModule", {
 exports.elements = void 0;
 var elements = {
   commentTextbox: document.querySelector('.comment__box'),
-  commentList: document.querySelector('.comment__list')
+  commentList: document.querySelector('.comment__list'),
+  viewPreviousButton: document.querySelector('.view_previous_comments-btn')
 };
 exports.elements = elements;
 },{}],"js/helper/getAvatar.js":[function(require,module,exports) {
@@ -334,6 +335,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  * Store for comments
  */
 var state = {};
+var defaultShowLimit = 4;
 /**
  * Comment List Controller
  */
@@ -387,45 +389,44 @@ _base.elements.commentList.addEventListener('click', function (e) {
 
 window.addEventListener('load', function (e) {
   state.commentList = new _CommentList.default();
-  state.commentList.readStorage(); //@todo: render n number of comment here based on config.js
+  state.commentList.readStorage();
+  initComments(state, 4);
 
-  var _iteratorNormalCompletion = true;
-  var _didIteratorError = false;
-  var _iteratorError = undefined;
+  _base.elements.viewPreviousButton.addEventListener('click', function (e) {
+    initComments(state);
 
-  try {
-    for (var _iterator = state.commentList.commentList[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-      var comment = _step.value;
-      console.log(comment);
-      var id = comment.id,
-          username = comment.username,
-          commentText = comment.text,
-          parentId = comment.parentId;
+    _base.elements.viewPreviousButton.remove();
+  });
 
-      if (parentId) {
-        commentListView.renderChildrenCommentMarkup(id, username, commentText, parentId, renderControls);
-      } else {
-        commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
-      }
-    }
-  } catch (err) {
-    _didIteratorError = true;
-    _iteratorError = err;
-  } finally {
-    try {
-      if (!_iteratorNormalCompletion && _iterator.return != null) {
-        _iterator.return();
-      }
-    } finally {
-      if (_didIteratorError) {
-        throw _iteratorError;
-      }
-    }
+  if (state.commentList.commentList.length > 4) {// elements.viewPreviousButton.remove();
   }
 });
 /**
+ * Initialize Comments
+ */
+
+var initComments = function initComments(state, limit) {
+  //@todo: render n number of comment here based on config.js
+  for (var i in state.commentList.commentList) {
+    var comment = state.commentList.commentList[i];
+    if (i == limit) return;
+    debugger;
+    var id = comment.id,
+        username = comment.username,
+        commentText = comment.text,
+        parentId = comment.parentId;
+
+    if (parentId) {
+      commentListView.renderChildrenCommentMarkup(id, username, commentText, parentId, renderControls);
+    } else {
+      commentListView.renderCommentMarkup(id, username, commentText, undefined, renderControls);
+    }
+  }
+};
+/**
  * Controls
  */
+
 
 var renderControls = function renderControls(id) {
   var comment = state.commentList.commentList.find(function (c) {
@@ -467,7 +468,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "51022" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "61510" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};
